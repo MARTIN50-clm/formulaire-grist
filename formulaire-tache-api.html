@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de saisie - Connecté à Grist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input.valid {
+            border-color: #4CAF50;
+        }
+
+        input.invalid {
+            border-color: #e74c3c;
+        }
+
+        .phone-input-wrapper {
+            position: relative;
+        }
+
+        #telephone {
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .service-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .service-group select {
+            flex: 1;
+        }
+
+        .add-service-btn {
+            padding: 12px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background 0.3s;
+        }
+
+        .add-service-btn:hover {
+            background: #1976D2;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #45a049;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-alert {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid #f5c6cb;
+        }
+
+        .new-service-input {
+            display: none;
+        }
+
+        .new-service-input.show {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .config-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .config-section h3 {
+            font-size: 14px;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-bottom: 8px;
+        }
+
+        .config-label {
+            font-size: 12px;
+            color: #856404;
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Section de configuration -->
+        <div class="config-section">
+            <h3>⚙️ Configuration API Grist</h3>
+            
+            <label class="config-label">URL Grist :</label>
+            <input type="text" 
+                   id="gristUrl" 
+                   class="config-input" 
+                   value="http://128.1.1.200:8484"
+                   placeholder="http://128.1.1.200:8484">
+            
+            <label class="config-label">Document ID :</label>
+            <input type="text" 
+                   id="docId" 
+                   class="config-input" 
+                   placeholder="Trouvé dans l'URL : /doc/ABC123XYZ">
+            
+            <label class="config-label">Nom de la table :</label>
+            <input type="text" 
+                   id="tableName" 
+                   class="config-input" 
+                   value="Tab_taches"
+                   placeholder="Tab_taches">
+            
+            <label class="config-label">Clé API (optionnel) :</label>
+            <input type="text" 
+                   id="apiKey" 
+                   class="config-input" 
+                   placeholder="Laissez vide si pas de clé API requise">
+        </div>
+
+        <h1>📋 Nouvelle tâche</h1>
+        
+        <div class="success-message" id="successMessage">
+            ✓ Tâche créée avec succès dans Grist !
+        </div>
+
+        <div class="error-alert" id="errorMessage">
+            ✗ Erreur : <span id="errorText"></span>
+        </div>
+
+        <form id="taskForm">
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">Description <span class="required">*</span></label>
+                <textarea id="description" name="description" required placeholder="Décrivez la tâche..."></textarea>
+                <div class="error-message" id="descriptionError">La description est obligatoire</div>
+            </div>
+
+            <!-- Entité -->
+            <div class="form-group">
+                <label for="entite">Entité <span class="required">*</span></label>
+                <select id="entite" name="entite" required>
+                    <option value="">Sélectionnez une entité</option>
+                    <option value="Direction">Direction</option>
+                    <option value="Comptabilité">Comptabilité</option>
+                    <option value="RH">Ressources Humaines</option>
+                    <option value="IT">Informatique</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="Production">Production</option>
+                    <option value="Logistique">Logistique</option>
+                </select>
+                <div class="error-message" id="entiteError">Veuillez sélectionner une entité</div>
+            </div>
+
+            <!-- Service -->
+            <div class="form-group">
+                <label for="service">Service <span class="required">*</span></label>
+                <div class="service-group">
+                    <select id="service" name="service" required>
+                        <option value="">Sélectionnez un service</option>
+                        <option value="Support">Support</option>
+                        <option value="Développement">Développement</option>
+                        <option value="Infrastructure">Infrastructure</option>
+                        <option value="Sécurité">Sécurité</option>
+                        <option value="Autre">➕ Créer un nouveau service</option>
+                    </select>
+                    <button type="button" class="add-service-btn" id="confirmNewService" style="display:none;">
+                        ✓ Ajouter
+                    </button>
+                </div>
+                <input type="text" 
+                       class="new-service-input" 
+                       id="newService" 
+                       placeholder="Nom du nouveau service">
+                <div class="error-message" id="serviceError">Veuillez sélectionner un service</div>
+            </div>
+
+            <!-- Demandeur -->
+            <div class="form-group">
+                <label for="demandeur">Demandeur <span class="required">*</span></label>
+                <input type="text" 
+                       id="demandeur" 
+                       name="demandeur" 
+                       required 
+                       placeholder="Nom et prénom">
+                <div class="error-message" id="demandeurError">Le nom du demandeur est obligatoire</div>
+            </div>
+
+            <!-- Téléphone -->
+            <div class="form-group">
+                <label for="telephone">Téléphone <span class="required">*</span></label>
+                <div class="phone-input-wrapper">
+                    <input type="text" 
+                           id="telephone" 
+                           name="telephone" 
+                           required 
+                           placeholder="__ __ __ __ __"
+                           maxlength="14">
+                </div>
+                <div class="error-message" id="telephoneError">
+                    Le téléphone doit contenir 10 chiffres (format: 06 12 34 56 78)
+                </div>
+            </div>
+
+            <!-- Bouton Submit -->
+            <button type="submit" class="submit-btn" id="submitBtn">
+                ✓ Créer la tâche
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Gestion du téléphone avec masque
+        const telephoneInput = document.getElementById('telephone');
+        const telephoneError = document.getElementById('telephoneError');
+
+        telephoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+            
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 2 === 0) {
+                    formatted += ' ';
+                }
+                formatted += value[i];
+            }
+            
+            e.target.value = formatted;
+            
+            if (value.length === 10) {
+                e.target.classList.remove('invalid');
+                e.target.classList.add('valid');
+                telephoneError.style.display = 'none';
+            } else if (value.length > 0) {
+                e.target.classList.remove('valid');
+                e.target.classList.add('invalid');
+                telephoneError.style.display = 'block';
+            } else {
+                e.target.classList.remove('valid', 'invalid');
+                telephoneError.style.display = 'none';
+            }
+        });
+
+        telephoneInput.addEventListener('keypress', function(e) {
+            if (!/\d/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' 
+                && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                e.preventDefault();
+            }
+        });
+
+        // Gestion du nouveau service
+        const serviceSelect = document.getElementById('service');
+        const newServiceInput = document.getElementById('newService');
+        const confirmNewServiceBtn = document.getElementById('confirmNewService');
+
+        serviceSelect.addEventListener('change', function() {
+            if (this.value === 'Autre') {
+                newServiceInput.classList.add('show');
+                confirmNewServiceBtn.style.display = 'block';
+                newServiceInput.focus();
+            } else {
+                newServiceInput.classList.remove('show');
+                confirmNewServiceBtn.style.display = 'none';
+                newServiceInput.value = '';
+            }
+        });
+
+        confirmNewServiceBtn.addEventListener('click', function() {
+            const newServiceValue = newServiceInput.value.trim();
+            if (newServiceValue) {
+                const newOption = document.createElement('option');
+                newOption.value = newServiceValue;
+                newOption.text = newServiceValue;
+                newOption.selected = true;
+                
+                const autreOption = serviceSelect.querySelector('option[value="Autre"]');
+                serviceSelect.insertBefore(newOption, autreOption);
+                
+                newServiceInput.classList.remove('show');
+                confirmNewServiceBtn.style.display = 'none';
+                newServiceInput.value = '';
+            }
+        });
+
+        // Gestion du formulaire
+        const form = document.getElementById('taskForm');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Cache les messages précédents
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Validation
+            let isValid = true;
+            
+            const fields = ['description', 'entite', 'service', 'demandeur'];
+            fields.forEach(field => {
+                const input = document.getElementById(field);
+                const error = document.getElementById(field + 'Error');
+                
+                if (!input.value.trim()) {
+                    error.style.display = 'block';
+                    input.classList.add('invalid');
+                    isValid = false;
+                } else {
+                    error.style.display = 'none';
+                    input.classList.remove('invalid');
+                }
+            });
+            
+            const phoneValue = telephoneInput.value.replace(/\D/g, '');
+            if (phoneValue.length !== 10) {
+                telephoneError.style.display = 'block';
+                telephoneInput.classList.add('invalid');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                return;
+            }
+            
+            // Récupère la configuration
+            const gristUrl = document.getElementById('gristUrl').value.trim();
+            const docId = document.getElementById('docId').value.trim();
+            const tableName = document.getElementById('tableName').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!gristUrl || !docId || !tableName) {
+                errorText.textContent = 'Veuillez configurer l\'URL Grist, le Document ID et le nom de la table';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Prépare les données
+            const formData = {
+                Description: document.getElementById('description').value,
+                Entite: document.getElementById('entite').value,
+                Service: document.getElementById('service').value,
+                Demandeur: document.getElementById('demandeur').value,
+                Telephone: phoneValue
+            };
+            
+            // Désactive le bouton pendant l'envoi
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Envoi en cours...';
+            
+            // Envoie à Grist
+            try {
+                await sendToGrist(gristUrl, docId, tableName, apiKey, formData);
+                
+                // Succès
+                successMessage.style.display = 'block';
+                form.reset();
+                telephoneInput.classList.remove('valid', 'invalid');
+                
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+                
+            } catch (error) {
+                // Erreur
+                errorText.textContent = error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✓ Créer la tâche';
+            }
+        });
+
+        // Fonction pour envoyer à Grist
+        async function sendToGrist(gristUrl, docId, tableName, apiKey, data) {
+            const url = `${gristUrl}/api/docs/${docId}/tables/${tableName}/records`;
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Ajoute la clé API si fournie
+            if (apiKey) {
+                headers['Authorization'] = `Bearer ${apiKey}`;
+            }
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    records: [{
+                        fields: data
+                    }]
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Erreur HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            return await response.json();
+        }
+    </script>
+</body>
+</html>
